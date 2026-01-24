@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Inventory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #f59e0b;
+            --gold-dark: #d97706;
+            --gold-light: #fbbf24;
+            --green: #10b981;
+            --green-dark: #059669;
+            --red: #ef4444;
+            --red-dark: #dc2626;
+            --bg: #f5f5f0;
+            --card: rgba(255, 255, 255, 0.7);
+            --card-solid: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e5e0;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            padding: 1rem;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--gold);
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(245, 158, 11, 0.25);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.5px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(20px);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .search {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            border-radius: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .search input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            font-size: 0.9375rem;
+            outline: none;
+            transition: all 0.2s;
+            background: var(--card-solid);
+        }
+
+        .search input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .inventory {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            border-radius: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .item:last-child {
+            margin-bottom: 0;
+        }
+
+        .item-name {
+            font-weight: 500;
+            font-size: 0.9375rem;
+            flex: 1;
+        }
+
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .qty {
+            background: var(--gold);
+            color: white;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.625rem;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            min-width: 2.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn {
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            border-radius: 0.625rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-minus {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-minus:hover {
+            background: var(--red-dark);
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-plus {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-plus:hover {
+            background: var(--green-dark);
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .log-section {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 16px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .log-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .btn-clear {
+            background: var(--gold);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.625rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-clear:hover {
+            background: var(--gold-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: var(--gold-light);
+            border-radius: 3px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+
+        .log-entry {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid;
+            font-size: 0.875rem;
+            transition: all 0.25s;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .log-entry:hover {
+            transform: translateX(3px);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .log-entry.increase {
+            border-left-color: var(--green);
+        }
+
+        .log-entry.decrease {
+            border-left-color: var(--red);
+        }
+
+        .log-entry strong {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .log-time {
+            color: var(--text-light);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9375rem;
+        }
+
+        @media (max-width: 640px) {
+            .item-name {
+                font-size: 0.875rem;
+            }
+
+            .qty {
+                font-size: 0.875rem;
+                padding: 0.25rem 0.625rem;
+            }
+
+            .btn {
+                width: 1.75rem;
+                height: 1.75rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Case Inventory</h1>
+            <div class="stats">
+                <div class="stat" id="total-items">0 Items</div>
+                <div class="stat" id="total-qty">0 Cases</div>
+            </div>
+        </div>
+
+        <div class="search">
+            <input type="text" id="search" placeholder="Search items..." autocomplete="off">
+        </div>
+
+        <div class="inventory">
+            <div id="inventory-list"></div>
+        </div>
+
+        <div class="log-section">
+            <div class="log-header">
+                <div class="log-title">Activity Log</div>
+                <button class="btn-clear" onclick="clearLog()">Clear</button>
+            </div>
+            <div class="log-container" id="log-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const initialData = [
+            { name: "Terminal", quantity: 9 },
+            { name: "CS20 Case", quantity: 15 },
+            { name: "Clutch Case", quantity: 23 },
+            { name: "Danger Zone Case", quantity: 33 },
+            { name: "Fracture Case", quantity: 59 },
+            { name: "Gamma 2 Case", quantity: 7 },
+            { name: "Horizon Case", quantity: 16 },
+            { name: "Prisma 2 Case", quantity: 106 },
+            { name: "Prisma Case", quantity: 106 },
+            { name: "Snakebite Case", quantity: 395 },
+            { name: "Spectrum 2 Case", quantity: 37 },
+            { name: "Recoil Case", quantity: 28 },
+            { name: "Kilowatt Case", quantity: 3 },
+            { name: "Dreams & Nightmares Case", quantity: 27 },
+            { name: "Chroma 3 Case", quantity: 2 },
+            { name: "Gamma Case", quantity: 4 },
+            { name: "Chroma 2 Case", quantity: 8 },
+            { name: "Spectrum Case", quantity: 44 },
+            { name: "Revolution Case", quantity: 12 },
+            { name: "Falchion Case", quantity: 1 },
+            { name: "Revolver Case", quantity: 1 }
+        ];
+
+        let inventory = [];
+        let changeLog = [];
+        let searchTerm = '';
+
+        function loadData() {
+            const saved = localStorage.getItem('inventory');
+            const savedLog = localStorage.getItem('changeLog');
+            inventory = saved ? JSON.parse(saved) : initialData;
+            changeLog = savedLog ? JSON.parse(savedLog) : [];
+        }
+
+        function saveData() {
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            localStorage.setItem('changeLog', JSON.stringify(changeLog));
+        }
+
+        function updateStats() {
+            const total = inventory.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('total-items').textContent = `${inventory.length} Items`;
+            document.getElementById('total-qty').textContent = `${total} Cases`;
+        }
+
+        function renderInventory() {
+            const list = document.getElementById('inventory-list');
+            const filtered = inventory.filter(item =>
+                item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty">No items found</div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map((item) => {
+                const idx = inventory.indexOf(item);
+                return `
+                    <div class="item">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-controls">
+                            <button class="btn btn-minus" onclick="change(${idx}, -1)">−</button>
+                            <div class="qty">${item.quantity}</div>
+                            <button class="btn btn-plus" onclick="change(${idx}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateStats();
+        }
+
+        function renderLog() {
+            const container = document.getElementById('log-container');
+
+            if (changeLog.length === 0) {
+                container.innerHTML = '<div class="empty">No activity yet</div>';
+                return;
+            }
+
+            container.innerHTML = changeLog.slice().reverse().map(entry => {
+                const cls = entry.change > 0 ? 'increase' : 'decrease';
+                const symbol = entry.change > 0 ? '+' : '';
+                return `
+                    <div class="log-entry ${cls}">
+                        <div><strong>${entry.itemName}</strong>: ${entry.oldQty} → ${entry.newQty} (${symbol}${entry.change})</div>
+                        <div class="log-time">${entry.timestamp}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function change(idx, delta) {
+            const item = inventory[idx];
+            const oldQty = item.quantity;
+            const newQty = Math.max(0, oldQty + delta);
+
+            if (newQty === oldQty) return;
+
+            item.quantity = newQty;
+            changeLog.push({
+                itemName: item.name,
+                oldQty,
+                newQty,
+                change: delta,
+                timestamp: new Date().toLocaleString()
+            });
+
+            saveData();
+            renderInventory();
+            renderLog();
+            document.getElementById('log-container').scrollTop = 0;
+        }
+
+        function clearLog() {
+            if (changeLog.length === 0) return;
+            if (confirm('Clear activity log?')) {
+                changeLog = [];
+                saveData();
+                renderLog();
+            }
+        }
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            renderInventory();
+        });
+
+        loadData();
+        renderInventory();
+        renderLog();
+    </script>
+</body>
+</html>
